@@ -1,0 +1,10 @@
+namespace MealBridge.Api.Configuration;
+
+public sealed class CorsSettings
+{
+    public const string SectionName = "Cors";
+    public const string PolicyName = "Frontend";
+
+    public string[] AllowedOrigins { get; init; } = [];
+    public string[] AllowedMethods { get; init; } = [];
+}

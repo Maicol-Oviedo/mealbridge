@@ -1,0 +1,55 @@
+---
+description: Reglas obligatorias de TDD, dominio, arquitectura y API para MealBridge
+alwaysApply: true
+---
+
+# MealBridge
+
+## TDD estricto
+
+- Antes de modificar comportamiento en `backend/MealBridge.Domain/` o `backend/MealBridge.Application/`, leer `.agents/skills/tdd/SKILL.md`.
+- Crear una tarea `*-test-red` antes de su pareja `*-impl`.
+- Ejecutar una prueba xUnit enfocada y confirmar que falla por la razón correcta.
+- No editar producción hasta registrar el rojo real en `AI-USE.md`.
+- Implementar el mínimo código, dejar verde la prueba enfocada y después ejecutar la suite relacionada.
+- Una prueba de API o UI no reemplaza una prueba unitaria de Domain o Application.
+
+## Máquina de estados
+
+Permitir únicamente:
+
+```text
+available → claimed | cancelled | expired
+claimed   → picked_up | cancelled
+picked_up → ninguna
+cancelled → ninguna
+expired   → ninguna
+```
+
+- La creación siempre produce `available`.
+- `claimed` solo se alcanza mediante `Claim`.
+- Un segundo reclamo conserva el primer `claimedBy` y se traduce a HTTP `409`.
+- Las transiciones ilegales se rechazan en Domain y se traducen a HTTP `409`.
+
+## Arquitectura
+
+```text
+API / Presentation → Application → Domain
+          └────────→ Infrastructure
+```
+
+- Domain no depende de HTTP, EF Core ni Infrastructure.
+- Application coordina casos de uso y depende de Domain.
+- API traduce HTTP; no decide reglas de negocio.
+- Infrastructure implementa persistencia; no redefine invariantes.
+
+## Contrato HTTP
+
+- Exponer una sola API.
+- Usar JSON camelCase.
+- Toda respuesta JSON usa `{ succeeded, data, error }`.
+- Mantener controllers delgados.
+- Escribir los mensajes de error en español y declararlos como constantes en la clase que los utiliza.
+- Cargar orígenes, URLs, puertos y listas configurables desde opciones tipadas; no escribirlos directamente en código.
+- No guardar secretos ni connection strings reales en Git.
+- No ampliar el alcance fuera de `MVP-SCOPE.md`.
